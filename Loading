@@ -1,0 +1,263 @@
+-- Enhanced Pet Spawner with Guaranteed Equipping
+local Spawner = Instance.new("ScreenGui")
+local Main = Instance.new("Frame")
+-- [Previous UI creation code remains the same...]
+
+-- Services
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Variables
+local petType = "FR"
+local equippedPets = {} -- Track equipped pets to prevent duplicates
+
+-- Enhanced Pet Spawning Function
+local function duplicatePet(petName)
+    if petName == "" then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Please enter a pet name",
+            Duration = 3
+        })
+        return
+    end
+    
+    -- First try to find physical pet models in ReplicatedStorage
+    local petModel = findPhysicalPetModel(petName)
+    if petModel then
+        spawnPhysicalPet(petModel, petName)
+        return
+    end
+    
+    -- Fallback to inventory system method
+    spawnInventoryPet(petName)
+end
+
+-- Function to find physical pet models
+local function findPhysicalPetModel(petName)
+    -- Common locations where pet assets might be stored
+    local searchLocations = {
+        ReplicatedStorage:FindFirstChild("Pets"),
+        ReplicatedStorage:FindFirstChild("Assets"),
+        ReplicatedStorage:FindFirstChild("PetAssets"),
+        ReplicatedStorage:FindFirstChild("Models"),
+        ReplicatedStorage:FindFirstChild("PetModels")
+    }
+    
+    local lowerPetName = string.lower(petName)
+    
+    for _, location in ipairs(searchLocations) do
+        if location and location:IsA("Folder") then
+            for _, child in ipairs(location:GetDescendants()) do
+                if child:IsA("Model") and string.lower(child.Name) == lowerPetName then
+                    return child
+                end
+            end
+        end
+    end
+    return nil
+end
+
+-- Function to spawn and equip physical pet model
+local function spawnPhysicalPet(petModel, petName)
+    local character = Players.LocalPlayer.Character
+    if not character then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Character not found",
+            Duration = 3
+        })
+        return
+    end
+    
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Error",
+            Text = "HumanoidRootPart not found",
+            Duration = 3
+        })
+        return
+    end
+    
+    -- Clean up any existing pet with same name
+    if equippedPets[petName] then
+        equippedPets[petName]:Destroy()
+    end
+    
+    -- Clone and configure the pet
+    local clone = petModel:Clone()
+    clone.Name = petName .. "_Pet"
+    
+    -- Position the pet near the player
+    local offset = CFrame.new(0, 0, -3)
+    clone:PivotTo(humanoidRootPart.CFrame * offset)
+    
+    -- Add attachment for smooth following
+    local attachment0 = Instance.new("Attachment")
+    attachment0.Parent = humanoidRootPart
+    
+    local attachment1 = Instance.new("Attachment")
+    attachment1.Parent = clone.PrimaryPart or clone:FindFirstChildWhichIsA("BasePart")
+    
+    local alignPosition = Instance.new("AlignPosition")
+    alignPosition.Attachment0 = attachment0
+    alignPosition.Attachment1 = attachment1
+    alignPosition.RigidityEnabled = false
+    alignPosition.MaxForce = 10000
+    alignPosition.Responsiveness = 50
+    alignPosition.Parent = clone
+    
+    local alignOrientation = Instance.new("AlignOrientation")
+    alignOrientation.Attachment0 = attachment0
+    alignOrientation.Attachment1 = attachment1
+    alignOrientation.RigidityEnabled = false
+    alignOrientation.MaxTorque = 10000
+    alignOrientation.Responsiveness = 50
+    alignOrientation.Parent = clone
+    
+    -- Apply neon/mega neon effects if needed
+    if petType == "NFR" or petType == "MFR" then
+        for _, part in ipairs(clone:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Material = Enum.Material.Neon
+                part.Color = Color3.fromHSV(math.random(), 1, 1)
+            end
+        end
+    end
+    
+    if petType == "MFR" then
+        -- More intense effect for MFR
+        local pointLight = Instance.new("PointLight")
+        pointLight.Brightness = 5
+        pointLight.Range = 10
+        pointLight.Parent = clone.PrimaryPart or clone:FindFirstChildWhichIsA("BasePart")
+    end
+    
+    clone.Parent = workspace
+    equippedPets[petName] = clone
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Success",
+        Text = "Spawned and equipped "..petName.." ("..petType..")",
+        Duration = 5
+    })
+end
+
+-- Enhanced inventory system pet spawning
+local function spawnInventoryPet(petName)
+    local success, Loads = pcall(function()
+        return require(ReplicatedStorage.Fsys).load
+    end)
+    
+    if not success then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Failed to load required modules",
+            Duration = 5
+        })
+        return
+    end
+    
+    local ClientData = Loads("ClientData")
+    local InventoryDB = Loads("InventoryDB")
+    local Inventory = ClientData.get("inventory")
+    
+    local function generate_prop()
+        return {
+            flyable = true,
+            rideable = true,
+            neon = petType == "NFR" or petType == "MFR",
+            mega_neon = petType == "MFR",
+            age = 1,
+            equipped = true -- Force equip by default
+        }
+    end
+
+    local found = false
+    for category_name, category_table in pairs(InventoryDB) do
+        for id, item in pairs(category_table) do
+            if category_name == "pets" and string.lower(item.name) == string.lower(petName) then
+                found = true
+                local fake_uuid = "uuid_"..HttpService:GenerateGUID(false)
+                local n_item = table.clone(item)
+
+                n_item["unique"] = fake_uuid
+                n_item["category"] = "pets"
+                n_item["properties"] = generate_prop()
+                n_item["newness_order"] = math.random(1, 900000)
+
+                if not Inventory[category_name] then
+                    Inventory[category_name] = {}
+                end
+
+                Inventory[category_name][fake_uuid] = n_item
+                
+                -- Enhanced remote event detection
+                local EquipRemote = findEquipRemote()
+                if EquipRemote then
+                    -- Unequip any currently equipped pets first
+                    for uuid, pet in pairs(Inventory.pets or {}) do
+                        if pet.properties.equipped then
+                            pcall(function()
+                                invokeEquipRemote(EquipRemote, uuid, "pets", false)
+                            end)
+                        end
+                    end
+                    
+                    -- Equip the new pet
+                    pcall(function()
+                        invokeEquipRemote(EquipRemote, fake_uuid, "pets", true)
+                    end)
+                end
+                
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "Success",
+                    Text = "Spawned and equipped "..petName.." ("..petType..")",
+                    Duration = 5
+                })
+                
+                break
+            end
+        end
+        if found then break end
+    end
+    
+    if not found then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Pet not found: "..petName,
+            Duration = 5
+        })
+    end
+end
+
+-- Helper function to find equip remote
+local function findEquipRemote()
+    -- Check common remote locations
+    return ReplicatedStorage:FindFirstChild("Equip") or 
+           ReplicatedStorage:FindFirstChild("EquipRemote") or
+           (ReplicatedStorage:FindFirstChild("RemoteEvents") and ReplicatedStorage.RemoteEvents:FindFirstChild("Equip")) or
+           (ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("Equip"))
+end
+
+-- Helper function to invoke equip remote
+local function invokeEquipRemote(remote, uuid, category, equip)
+    if remote:IsA("RemoteEvent") then
+        remote:FireServer(uuid, category, equip)
+    elseif remote:IsA("RemoteFunction") then
+        remote:InvokeServer(uuid, category, equip)
+    else
+        -- Try both methods if type is unknown
+        pcall(function() remote:FireServer(uuid, category, equip) end)
+        pcall(function() remote:InvokeServer(uuid, category, equip) end)
+    end
+end
+
+-- [Rest of your existing connections and UI code...]
+
+-- Initialize
+updatePetTypeButtons(FR)
