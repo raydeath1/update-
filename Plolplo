@@ -1,0 +1,446 @@
+-- Gui to Lua
+-- Version: 3.2
+
+-- Instances:
+local Spawner = Instance.new("ScreenGui")
+local Main = Instance.new("Frame")
+local TopBar = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local Branding = Instance.new("TextLabel")
+local Content = Instance.new("Frame")
+local PetTypeSelector = Instance.new("Frame")
+local FR = Instance.new("TextButton")
+local UICorner_FR = Instance.new("UICorner")
+local NFR = Instance.new("TextButton")
+local UICorner_NFR = Instance.new("UICorner")
+local MFR = Instance.new("TextButton")
+local UICorner_MFR = Instance.new("UICorner")
+local InputArea = Instance.new("Frame")
+local NameBox = Instance.new("TextBox")
+local UICorner_TextBox = Instance.new("UICorner")
+local SpawnButton = Instance.new("TextButton")
+local UICorner_Spawn = Instance.new("UICorner")
+local UICorner_Main = Instance.new("UICorner")
+local UICorner_Content = Instance.new("UICorner")
+local UICorner_TopBar = Instance.new("UICorner")
+local Stroke_Main = Instance.new("UIStroke")
+
+-- Variables
+local petType = "FR"
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+-- Animation Variables
+local smoothSineOffset = 0
+local smoothSineSpeed = 1.5
+local smoothSineAmplitude = 2
+local pulseSpeed = 0.8
+local minTransparency = 0.4
+local maxTransparency = 0.7
+
+-- Properties
+Spawner.Name = "PetSpawner"
+Spawner.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+Spawner.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+Spawner.ResetOnSpawn = false
+
+Main.Name = "Main"
+Main.Parent = Spawner
+Main.AnchorPoint = Vector2.new(0.5, 0.5)
+Main.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Main.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Main.BorderSizePixel = 0
+Main.Position = UDim2.new(0.5, 0, 0.5, 0)
+Main.Size = UDim2.new(0, 400, 0, 220)
+Main.ZIndex = 2
+
+UICorner_Main.CornerRadius = UDim.new(0, 12)
+UICorner_Main.Parent = Main
+
+Stroke_Main.Name = "Stroke_Main"
+Stroke_Main.Parent = Main
+Stroke_Main.Color = Color3.fromRGB(80, 80, 80)
+Stroke_Main.Thickness = 2
+Stroke_Main.Transparency = 0.5
+
+TopBar.Name = "TopBar"
+TopBar.Parent = Main
+TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+TopBar.BorderSizePixel = 0
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+
+UICorner_TopBar.CornerRadius = UDim.new(0, 12)
+UICorner_TopBar.Parent = TopBar
+
+Title.Name = "Title"
+Title.Parent = TopBar
+Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1.000
+Title.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Title.BorderSizePixel = 0
+Title.Position = UDim2.new(0.05, 0, 0, 0)
+Title.Size = UDim2.new(0.6, 0, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "PET SPAWNER"
+Title.TextColor3 = Color3.fromRGB(220, 220, 220)
+Title.TextSize = 18
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Smoother White Watermark
+Branding.Name = "Branding"
+Branding.Parent = TopBar
+Branding.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Branding.BackgroundTransparency = 1.000
+Branding.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Branding.BorderSizePixel = 0
+Branding.Position = UDim2.new(0.6, 0, 0, 0)
+Branding.Size = UDim2.new(0.4, 0, 1, 0)
+Branding.Font = Enum.Font.FredokaOne
+Branding.Text = "reiscripts"
+Branding.TextColor3 = Color3.fromRGB(255, 255, 255)
+Branding.TextSize = 14
+Branding.TextXAlignment = Enum.TextXAlignment.Right
+Branding.TextTransparency = 0.5
+Branding.ZIndex = 3
+
+Content.Name = "Content"
+Content.Parent = Main
+Content.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Content.BorderSizePixel = 0
+Content.Position = UDim2.new(0, 0, 0, 40)
+Content.Size = UDim2.new(1, 0, 1, -40)
+
+UICorner_Content.CornerRadius = UDim.new(0, 12)
+UICorner_Content.Parent = Content
+
+PetTypeSelector.Name = "PetTypeSelector"
+PetTypeSelector.Parent = Content
+PetTypeSelector.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+PetTypeSelector.BackgroundTransparency = 1
+PetTypeSelector.BorderSizePixel = 0
+PetTypeSelector.Position = UDim2.new(0.05, 0, 0.05, 0)
+PetTypeSelector.Size = UDim2.new(0.9, 0, 0.3, 0)
+
+FR.Name = "FR"
+FR.Parent = PetTypeSelector
+FR.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+FR.BorderColor3 = Color3.fromRGB(0, 0, 0)
+FR.BorderSizePixel = 0
+FR.Position = UDim2.new(0, 0, 0, 0)
+FR.Size = UDim2.new(0.32, 0, 1, 0)
+FR.Font = Enum.Font.GothamBold
+FR.Text = "FR"
+FR.TextColor3 = Color3.fromRGB(25, 255, 21)
+FR.TextSize = 14.000
+FR.TextWrapped = true
+
+UICorner_FR.CornerRadius = UDim.new(0, 8)
+UICorner_FR.Parent = FR
+
+NFR.Name = "NFR"
+NFR.Parent = PetTypeSelector
+NFR.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+NFR.BorderColor3 = Color3.fromRGB(0, 0, 0)
+NFR.BorderSizePixel = 0
+NFR.Position = UDim2.new(0.34, 0, 0, 0)
+NFR.Size = UDim2.new(0.32, 0, 1, 0)
+NFR.Font = Enum.Font.GothamBold
+NFR.Text = "NFR"
+NFR.TextColor3 = Color3.fromRGB(255, 255, 255)
+NFR.TextSize = 14.000
+NFR.TextWrapped = true
+
+UICorner_NFR.CornerRadius = UDim.new(0, 8)
+UICorner_NFR.Parent = NFR
+
+MFR.Name = "MFR"
+MFR.Parent = PetTypeSelector
+MFR.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+MFR.BorderColor3 = Color3.fromRGB(0, 0, 0)
+MFR.BorderSizePixel = 0
+MFR.Position = UDim2.new(0.68, 0, 0, 0)
+MFR.Size = UDim2.new(0.32, 0, 1, 0)
+MFR.Font = Enum.Font.GothamBold
+MFR.Text = "MFR"
+MFR.TextColor3 = Color3.fromRGB(255, 255, 255)
+MFR.TextSize = 14.000
+MFR.TextWrapped = true
+
+UICorner_MFR.CornerRadius = UDim.new(0, 8)
+UICorner_MFR.Parent = MFR
+
+InputArea.Name = "InputArea"
+InputArea.Parent = Content
+InputArea.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+InputArea.BackgroundTransparency = 1
+InputArea.BorderSizePixel = 0
+InputArea.Position = UDim2.new(0.05, 0, 0.4, 0)
+InputArea.Size = UDim2.new(0.9, 0, 0.5, 0)
+
+NameBox.Name = "NameBox"
+NameBox.Parent = InputArea
+NameBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+NameBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+NameBox.BorderSizePixel = 0
+NameBox.Position = UDim2.new(0, 0, 0, 0)
+NameBox.Size = UDim2.new(1, 0, 0.6, 0)
+NameBox.Font = Enum.Font.Gotham
+NameBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+NameBox.PlaceholderText = "Enter Pet Name (e.g. 'Dragon')"
+NameBox.Text = ""
+NameBox.TextColor3 = Color3.fromRGB(220, 220, 220)
+NameBox.TextSize = 14.000
+NameBox.TextWrapped = true
+
+UICorner_TextBox.CornerRadius = UDim.new(0, 8)
+UICorner_TextBox.Parent = NameBox
+
+SpawnButton.Name = "SpawnButton"
+SpawnButton.Parent = InputArea
+SpawnButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+SpawnButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+SpawnButton.BorderSizePixel = 0
+SpawnButton.Position = UDim2.new(0.25, 0, 0.7, 0)
+SpawnButton.Size = UDim2.new(0.5, 0, 0.3, 0)
+SpawnButton.Font = Enum.Font.GothamBold
+SpawnButton.Text = "SPAWN PET"
+SpawnButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+SpawnButton.TextSize = 16.000
+SpawnButton.TextWrapped = true
+
+UICorner_Spawn.CornerRadius = UDim.new(0, 8)
+UICorner_Spawn.Parent = SpawnButton
+
+-- Functions
+local function tweenButton(button)
+    local originalSize = button.Size
+    local originalPos = button.Position
+    
+    local tweenIn = TweenService:Create(
+        button,
+        TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {Size = UDim2.new(originalSize.X.Scale * 0.95, originalSize.X.Offset * 0.95, originalSize.Y.Scale * 0.95, originalSize.Y.Offset * 0.95)}
+    )
+    
+    local tweenOut = TweenService:Create(
+        button,
+        TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {Size = originalSize}
+    )
+    
+    tweenIn:Play()
+    tweenIn.Completed:Connect(function()
+        tweenOut:Play()
+    end)
+end
+
+local function updatePetTypeButtons(selectedButton)
+    local buttons = {FR, NFR, MFR}
+    for _, button in pairs(buttons) do
+        if button == selectedButton then
+            button.TextColor3 = Color3.fromRGB(25, 255, 21)
+            button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        else
+            button.TextColor3 = Color3.fromRGB(220, 220, 220)
+            button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        end
+    end
+end
+
+local function duplicatePet(petName)
+    if petName == "" then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Please enter a pet name",
+            Duration = 3
+        })
+        return
+    end
+    
+    local success, Loads = pcall(function()
+        return require(game.ReplicatedStorage.Fsys).load
+    end)
+    
+    if not success then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Failed to load required modules",
+            Duration = 5
+        })
+        return
+    end
+    
+    local ClientData = Loads("ClientData")
+    local InventoryDB = Loads("InventoryDB")
+    local Inventory = ClientData.get("inventory")
+    
+    local function generate_prop()
+        return {
+            flyable = true,
+            rideable = true,
+            neon = petType == "NFR" or petType == "MFR",
+            mega_neon = petType == "MFR",
+            age = 1,
+            equipped = false
+        }
+    end
+
+    local function cloneTable(original)
+        local copy = {}
+        for key, value in pairs(original) do
+            if type(value) == "table" then
+                copy[key] = cloneTable(value)
+            else
+                copy[key] = value
+            end
+        end
+        return copy
+    end
+
+    local found = false
+    for category_name, category_table in pairs(InventoryDB) do
+        for id, item in pairs(category_table) do
+            if category_name == "pets" and string.lower(item.name) == string.lower(petName) then
+                found = true
+                local fake_uuid = "uuid_" .. game.HttpService:GenerateGUID(false)
+                local n_item = cloneTable(item)
+
+                n_item["unique"] = fake_uuid
+                n_item["category"] = "pets"
+                n_item["properties"] = generate_prop()
+                n_item["newness_order"] = math.random(1, 900000)
+
+                if not Inventory[category_name] then
+                    Inventory[category_name] = {}
+                end
+
+                Inventory[category_name][fake_uuid] = n_item
+                
+                local EquipRemote = game.ReplicatedStorage:FindFirstChild("Equip")
+                if EquipRemote then
+                    for uuid, pet in pairs(Inventory.pets or {}) do
+                        if pet.properties.equipped then
+                            EquipRemote:InvokeServer(uuid, "pets")
+                        end
+                    end
+                    EquipRemote:InvokeServer(fake_uuid, "pets")
+                end
+                
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "Success",
+                    Text = "Spawned and equipped " .. petName .. " (" .. petType .. ")",
+                    Duration = 5
+                })
+                
+                break
+            end
+        end
+        if found then break end
+    end
+    
+    if not found then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Pet not found: " .. petName,
+            Duration = 5
+        })
+    end
+end
+
+-- Connections
+FR.MouseButton1Click:Connect(function()
+    petType = "FR"
+    updatePetTypeButtons(FR)
+    tweenButton(FR)
+end)
+
+NFR.MouseButton1Click:Connect(function()
+    petType = "NFR"
+    updatePetTypeButtons(NFR)
+    tweenButton(NFR)
+end)
+
+MFR.MouseButton1Click:Connect(function()
+    petType = "MFR"
+    updatePetTypeButtons(MFR)
+    tweenButton(MFR)
+end)
+
+SpawnButton.MouseButton1Click:Connect(function()
+    duplicatePet(NameBox.Text)
+    tweenButton(SpawnButton)
+end)
+
+-- Smoother Watermark Animation
+RunService.Heartbeat:Connect(function(deltaTime)
+    smoothSineOffset = smoothSineOffset + deltaTime
+    
+    -- Ultra-smooth vertical movement
+    local easedSine = math.sin(smoothSineOffset * smoothSineSpeed) * 0.5 + 0.5
+    local yOffset = easedSine * smoothSineAmplitude * 2 - smoothSineAmplitude
+    
+    Branding.Position = UDim2.new(
+        0.6,
+        0,
+        0,
+        yOffset
+    )
+    
+    -- Smooth pulsing transparency
+    local pulse = (math.sin(smoothSineOffset * pulseSpeed) + 1) * 0.5
+    Branding.TextTransparency = minTransparency + (maxTransparency - minTransparency) * pulse
+    
+    -- Subtle white brightness variation
+    local whiteVariation = 0.9 + (math.sin(smoothSineOffset * 0.7) * 0.1)
+    Branding.TextColor3 = Color3.fromRGB(
+        255 * whiteVariation,
+        255 * whiteVariation,
+        255 * whiteVariation
+    )
+end)
+
+-- Initialize
+updatePetTypeButtons(FR)
+
+-- Dragging Functionality
+local UserInputService = game:GetService("UserInputService")
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    Main.Position = UDim2.new(
+        startPos.X.Scale, 
+        startPos.X.Offset + delta.X,
+        startPos.Y.Scale, 
+        startPos.Y.Offset + delta.Y
+    )
+end
+
+TopBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Main.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+TopBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
